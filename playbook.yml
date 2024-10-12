@@ -1,6 +1,8 @@
 - name: Laboratorio Hadoop
   hosts: all
   become: true
+  vars:
+    custom_hosts_file: "custom_hosts"
   tasks:
     - name: Atualizar repositories
       ansible.builtin.apt:
@@ -48,10 +50,14 @@
           export YARN_NODEMANAGER_USER="$HDFS_NAMENODE_USER"
         backup: yes
 
-    - name: Adicionar hosts do node0 e node1 no /etc/hosts
-      blockinfile:
+    - name: Ler arquivo custom_hosts
+      slurp:
+        src: "{{ custom_hosts_file }}"
+      register: custom_hosts_content
+
+    - name: Adicionar entradas do arquivo custom_hosts ao /etc/hosts
+      lineinfile:
         path: /etc/hosts
-        block: |
-          192.168.0.102   node1
-          192.168.0.105   node0
+        line: "{{ item }}"
         state: present
+      loop: "{{ custom_hosts_content['content'] | b64decode | splitlines }}"
