@@ -1,0 +1,19 @@
+- name: Laboratorio Hadoop
+  hosts: all
+  become: true
+  tasks:
+    - name: Atualizar repositories
+      ansible.builtin.apt:
+        update_cache: yes
+        state: latest
+        name: "*"
+
+    - name: Instalar rsync
+      ansible.builtin.apt:
+        name: rsync
+        state: present
+
+    - name: Copiar hadoop
+      ansible.posix.synchronize:
+        src: /root/hadoop-3.4.0
+        dest: /root
