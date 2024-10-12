@@ -13,7 +13,45 @@
         name: rsync
         state: present
 
+    - name: Instalar todos os pacotes OpenJDK 11
+      ansible.builtin.apt:
+        name: "openjdk-11*"
+        state: present
+        update_cache: yes
+
     - name: Copiar hadoop
       ansible.posix.synchronize:
         src: /root/hadoop-3.4.0
         dest: /root
+
+    - name: Adicionar variáveis de ambiente do Hadoop ao .bashrc
+      blockinfile:
+        path: /root/.bashrc
+        block: |
+          # Hadoop environment variables
+          export HADOOP_HOME="/root/hadoop-3.4.0"
+          export HADOOP_COMMON_HOME="$HADOOP_HOME"
+          export HADOOP_HDFS_HOME="$HADOOP_HOME"
+          export HADOOP_MAPRED_HOME="$HADOOP_HOME"
+          export HADOOP_YARN_HOME="$HADOOP_HOME"
+          export HADOOP_CONF_DIR="$HADOOP_HOME/etc/hadoop"
+          export HADOOP_COMMON_LIB_NATIVE_DIR="$HADOOP_HOME/lib/native"
+          export HADOOP_OPTS="$HADOOP_OPTS -XX:-PrintWarnings -Djava.net.preferIPv4Stack=true -Djava.library.path=$HADOOP_COMMON_LIB_NATIVE_DIR"
+          export LD_LIBRARY_PATH="$HADOOP_COMMON_LIB_NATIVE_DIR"
+          export JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
+          export _JAVA_OPTIONS="-Xmx2048m"
+          export PATH="$PATH:$HADOOP_HOME/sbin:$HADOOP_HOME/bin:$JAVA_HOME/bin"
+          export HDFS_NAMENODE_USER="root"
+          export HDFS_DATANODE_USER="$HDFS_NAMENODE_USER"
+          export HDFS_SECONDARYNAMENODE_USER="$HDFS_NAMENODE_USER"
+          export YARN_RESOURCEMANAGER_USER="$HDFS_NAMENODE_USER"
+          export YARN_NODEMANAGER_USER="$HDFS_NAMENODE_USER"
+        backup: yes
+
+    - name: Adicionar hosts do node0 e node1 no /etc/hosts
+      blockinfile:
+        path: /etc/hosts
+        block: |
+          192.168.0.102   node1
+          192.168.0.105   node0
+        state: present
