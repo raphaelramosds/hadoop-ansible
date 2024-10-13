@@ -5,24 +5,23 @@
     custom_hosts_file: "custom_hosts"
   tasks:
     - name: Atualizar repositories
-      ansible.builtin.apt:
+      apt:
         update_cache: yes
         state: latest
-        name: "*"
 
     - name: Instalar rsync
-      ansible.builtin.apt:
+      apt:
         name: rsync
         state: present
 
     - name: Instalar todos os pacotes OpenJDK 11
-      ansible.builtin.apt:
+      apt:
         name: "openjdk-11*"
         state: present
         update_cache: yes
 
     - name: Copiar hadoop
-      ansible.posix.synchronize:
+      synchronize:
         src: /root/hadoop-3.4.0
         dest: /root
 
@@ -50,14 +49,18 @@
           export YARN_NODEMANAGER_USER="$HDFS_NAMENODE_USER"
         backup: yes
 
-    - name: Ler arquivo custom_hosts
-      slurp:
+    - name: Copiar custom_hosts
+      synchronize:
         src: "{{ custom_hosts_file }}"
-      register: custom_hosts_content
+        dest: /root        
 
-    - name: Adicionar entradas do arquivo custom_hosts ao /etc/hosts
+    - name: Ler o arquivo custom_hosts
+      set_fact:
+        custom_hosts_content: "{{ lookup('file', 'custom_hosts') }}"
+
+    - name: Adicionar as entradas ao /etc/hosts
       lineinfile:
         path: /etc/hosts
         line: "{{ item }}"
         state: present
-      loop: "{{ custom_hosts_content['content'] | b64decode | splitlines }}"
+      with_items: "{{ custom_hosts_content.splitlines() }}"
