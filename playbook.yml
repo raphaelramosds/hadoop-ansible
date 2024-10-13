@@ -4,7 +4,7 @@
   vars:
     custom_hosts_file: "custom_hosts"
   tasks:
-    - name: Atualizar repositories
+    - name: Atualizar repositorios
       apt:
         update_cache: yes
         state: latest
