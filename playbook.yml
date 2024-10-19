@@ -2,7 +2,7 @@
   hosts: all
   become: true
   vars:
-    custom_hosts_file: "custom_hosts"
+    hosts_file: "hosts"
   tasks:
     - name: Atualizar repositorios
       apt:
@@ -49,18 +49,52 @@
           export YARN_NODEMANAGER_USER="$HDFS_NAMENODE_USER"
         backup: yes
 
-    - name: Copiar custom_hosts
+    - name: Copiar hosts
       synchronize:
-        src: "{{ custom_hosts_file }}"
+        src: "{{ hosts_file }}"
         dest: /root        
 
-    - name: Ler o arquivo custom_hosts
+    - name: Ler o arquivo hosts
       set_fact:
-        custom_hosts_content: "{{ lookup('file', 'custom_hosts') }}"
+        hosts_content: "{{ lookup('file', 'hosts') }}"
 
     - name: Adicionar as entradas ao /etc/hosts
       lineinfile:
         path: /etc/hosts
         line: "{{ item }}"
         state: present
-      with_items: "{{ custom_hosts_content.splitlines() }}"
+      with_items: "{{ hosts_content.splitlines() }}"
+
+    - name: Remover diretorio data nos nodes
+      file:
+        path: /root/data
+        state: absent
+
+- name: Configuração do cluster   
+  hosts: master
+  become: true
+  tasks:  
+    - name: Parar maquinas do cluster
+      command: stop-all.sh
+      
+    - name: Formatar HDFS
+      command: hdfs namenode -format
+
+    - name: Subir DFS
+      command: start-dfs.sh
+
+    - name: Subir yarn
+      command: start-yarn.sh
+
+    - name: Criar as pastas e copiar arquivos para o HDFS
+      command: hdfs dfs -mkdir -p /user/root/input
+
+    - name: Recuperar arquivos XML
+      find:
+        path: "{{ lookup('env', 'HADOOP_HOME') }}/etc/hadoop/"
+        pattern: "*.xml"
+      register: xml_files
+
+    - name: Copiar arquivos para a pasta input
+      command: hdfs dfs -put {{ item.path }} input
+      with_items: "{{ xml_files.files }}"

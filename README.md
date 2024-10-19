@@ -12,7 +12,7 @@ sudo su
 
 Install Ansible following [Installing Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) accordingly to your operating system
 
-Define nodes IP addresses and hostnames on custom_hosts file as IPADDRESS HOSTNAME line by line, e.g, 8.8.8.8 master
+Define nodes IP addresses and hostnames on hosts file as IPADDRESS HOSTNAME line by line, e.g, 8.8.8.8 master
 
 Run this script for creating Ansible inventory
 
