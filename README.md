@@ -4,7 +4,7 @@ This repository aims to setup a hadoop cluster of nodes with an Ansible playbook
 
 ## How to run this repository
 
-Log in as sudo user on Linux
+Log in as super user on Linux
 
 ```
 sudo su
@@ -12,7 +12,11 @@ sudo su
 
 Install Ansible following [Installing Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html) accordingly to your operating system
 
-Define nodes IP addresses and hostnames on hosts file as IPADDRESS HOSTNAME line by line, e.g, 8.8.8.8 master
+Define nodes IP addresses and hostnames on hosts file as IPADDRESS HOSTNAME line by line, for instance 
+
+```
+8.8.8.8 master
+```
 
 Run this script for creating Ansible inventory
 
