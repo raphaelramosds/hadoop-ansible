@@ -43,6 +43,7 @@ ansible-playbook playbook.yml
 
 ## Future
 
+- Automation of copying SSH key amongst nodes
 - Docker Support
 - Ansible playbook tasks for setting up Hadoop XML files on etc/hadoop, based on templates given by the user
 
